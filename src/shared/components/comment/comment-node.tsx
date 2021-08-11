@@ -5,6 +5,7 @@ import {
   AddModToCommunity,
   BanFromCommunity,
   BanPerson,
+  BlockPerson,
   CommentView,
   CommunityModeratorView,
   CreateCommentLike,
@@ -279,7 +280,7 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
                       )}
                     </button>
                   )}
-                  {UserService.Instance.localUserView && !this.props.viewOnly && (
+                  {UserService.Instance.myUserInfo && !this.props.viewOnly && (
                     <>
                       <button
                         className={`btn btn-link btn-animate ${
@@ -333,15 +334,28 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
                       ) : (
                         <>
                           {!this.myComment && (
-                            <button class="btn btn-link btn-animate">
-                              <Link
-                                className="text-muted"
-                                to={`/create_private_message/recipient/${cv.creator.id}`}
-                                title={i18n.t("message").toLowerCase()}
+                            <>
+                              <button class="btn btn-link btn-animate">
+                                <Link
+                                  className="text-muted"
+                                  to={`/create_private_message/recipient/${cv.creator.id}`}
+                                  title={i18n.t("message").toLowerCase()}
+                                >
+                                  <Icon icon="mail" />
+                                </Link>
+                              </button>
+                              <button
+                                class="btn btn-link btn-animate text-muted"
+                                onClick={linkEvent(
+                                  this,
+                                  this.handleBlockUserClick
+                                )}
+                                data-tippy-content={i18n.t("block_user")}
+                                aria-label={i18n.t("block_user")}
                               >
-                                <Icon icon="mail" />
-                              </Link>
-                            </button>
+                                <Icon icon="slash" />
+                              </button>
+                            </>
                           )}
                           <button
                             class="btn btn-link btn-animate text-muted"
@@ -825,7 +839,7 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
   get myComment(): boolean {
     return (
       this.props.node.comment_view.creator.id ==
-      UserService.Instance.localUserView?.person.id
+      UserService.Instance.myUserInfo?.local_user_view.person.id
     );
   }
 
@@ -860,7 +874,7 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
         .concat(this.props.moderators.map(m => m.moderator.id));
 
       return canMod(
-        UserService.Instance.localUserView,
+        UserService.Instance.myUserInfo,
         adminsThenMods,
         this.props.node.comment_view.creator.id
       );
@@ -873,7 +887,7 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
     return (
       this.props.admins &&
       canMod(
-        UserService.Instance.localUserView,
+        UserService.Instance.myUserInfo,
         this.props.admins.map(a => a.person.id),
         this.props.node.comment_view.creator.id
       )
@@ -883,10 +897,10 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
   get amCommunityCreator(): boolean {
     return (
       this.props.moderators &&
-      UserService.Instance.localUserView &&
+      UserService.Instance.myUserInfo &&
       this.props.node.comment_view.creator.id !=
-        UserService.Instance.localUserView.person.id &&
-      UserService.Instance.localUserView.person.id ==
+        UserService.Instance.myUserInfo.local_user_view.person.id &&
+      UserService.Instance.myUserInfo.local_user_view.person.id ==
         this.props.moderators[0].moderator.id
     );
   }
@@ -894,10 +908,10 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
   get amSiteCreator(): boolean {
     return (
       this.props.admins &&
-      UserService.Instance.localUserView &&
+      UserService.Instance.myUserInfo &&
       this.props.node.comment_view.creator.id !=
-        UserService.Instance.localUserView.person.id &&
-      UserService.Instance.localUserView.person.id ==
+        UserService.Instance.myUserInfo.local_user_view.person.id &&
+      UserService.Instance.myUserInfo.local_user_view.person.id ==
         this.props.admins[0].person.id
     );
   }
@@ -919,6 +933,15 @@ export class CommentNode extends Component<CommentNodeProps, CommentNodeState> {
   handleEditClick(i: CommentNode) {
     i.state.showEdit = true;
     i.setState(i.state);
+  }
+
+  handleBlockUserClick(i: CommentNode) {
+    let blockUserForm: BlockPerson = {
+      person_id: i.props.node.comment_view.creator.id,
+      block: true,
+      auth: authField(),
+    };
+    WebSocketService.Instance.send(wsClient.blockPerson(blockUserForm));
   }
 
   handleDeleteClick(i: CommentNode) {
