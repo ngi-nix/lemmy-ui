@@ -10,7 +10,7 @@
   outputs = { self, nixpkgs, lemmy-ui-src }:
     let
       # Generate a user-friendly version numer.
-      userFriendlyVersion = src: builtins.substring 0 8 src.lastModifiedDate;
+      userFriendlyVersion = src: builtins.substring 0 8 lemmy-ui-src.lastModifiedDate;
 
       # System types to support.
       supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
@@ -29,9 +29,10 @@
         lemmy-ui = with final; mkYarnPackage rec {
           pname = "lemmy-ui";
           version = userFriendlyVersion src;
-          src = lemmy-ui-src;
+          src = ./.;
           yarnNix = ./yarn.nix;
           yarnLock = ./yarn.lock;
+          buildInputs = [ pkgs.nodePackages.rimraf ];
           # installPhase = ''
           #   yarn --offline build
           #   cp -r deps/lemmy-ui/dist $out
