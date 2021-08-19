@@ -3,16 +3,17 @@
     "lemmy-ui-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1629236787,
-        "narHash": "sha256-WrSjt2jS12Qgb8yvCiUcoR2loOBzfeSqeKFsYNFJre4=",
+        "lastModified": 1627660593,
+        "narHash": "sha256-yboA/dhXuapTkS7cyphGRt5es6D0wC5mzZVt8Ar6nbc=",
         "owner": "LemmyNet",
         "repo": "lemmy-ui",
-        "rev": "03a2b467efeeda17cf96bf3a2f13d47fb524645f",
+        "rev": "6994a3a6913ff3eabe98f5f182343d58ffb6a3a0",
         "type": "github"
       },
       "original": {
         "owner": "LemmyNet",
         "repo": "lemmy-ui",
+        "rev": "6994a3a6913ff3eabe98f5f182343d58ffb6a3a0",
         "type": "github"
       }
     },

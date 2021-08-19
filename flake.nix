@@ -5,7 +5,7 @@
   inputs.nixpkgs.url = "nixpkgs/nixpkgs-unstable";
 
   # Upstream source tree(s).
-  inputs.lemmy-ui-src = { url = "github:LemmyNet/lemmy-ui"; flake = false; };
+  inputs.lemmy-ui-src = { url = "github:LemmyNet/lemmy-ui/6994a3a6913ff3eabe98f5f182343d58ffb6a3a0"; flake = false; };
 
   outputs = { self, nixpkgs, lemmy-ui-src }:
     let
@@ -24,35 +24,51 @@
     {
 
       # A Nixpkgs overlay.
-      overlay = final: prev: {
-
-        lemmy-ui = with final; mkYarnPackage rec {
-          pname = "lemmy-ui";
-          version = userFriendlyVersion src;
-          src = ./.;
-          yarnNix = ./yarn.nix;
-          yarnLock = ./yarn.lock;
-          buildInputs = [ pkgs.nodePackages.rimraf ];
-          # installPhase = ''
-          #   yarn --offline build
-          #   cp -r deps/lemmy-ui/dist $out
-          # '';
-          installPhase = ''
-            yarn install --pure-lockfile
+      overlay = final: prev:
+        let
+          src_with_submodules = builtins.fetchGit {
+            url = "https://github.com/LemmyNet/lemmy-ui";
+            inherit (lemmy-ui-src) rev;
+            ref = "main";
+            submodules = true;
+          };
+          version = "0.11.3";
+          patchedPackageJSON = final.runCommand "package.json" { } ''
+            ${final.jq}/bin/jq '.version = "${version}"' ${src_with_submodules}/package.json > $out
           '';
-          buildPhase = ''
-            yarn build:prod --offline
-          '';
-          # don't generate the dist tarball
-          # (`doDist = false` does not work in mkYarnPackage)
-          distPhase = ''
-            true
-          '';
+        in
+        {
+          lemmy-ui = with final; mkYarnPackage rec {
+            pname = "lemmy-ui";
+            inherit version;
+            src = src_with_submodules;
+            extraBuildInputs = [ final.libsass ];
+            yarnNix = ./yarn.nix;
+            yarnLock = ./yarn.lock;
+            packageJSON = patchedPackageJSON;
+            # yarnPreBuild = ''
+            #   mkdir -p $HOME/.node-gyp/${nodejs.version}
+            #   echo 9 > $HOME/.node-gyp/${nodejs.version}/installVersion
+            #   ln -sfv ${nodejs}/include $HOME/.node-gyp/${nodejs.version}
+            # '';
+            # pkgConfig = {
+            #   node-sass = {
+            #     buildInputs = with final;[ python libsass pkgconfig ];
+            #     postInstall = ''
+            #       LIBSASS_EXT=auto yarn --offline run build
+            #       rm build/config.gypi
+            #     '';
+            #   };
+            # };
+            buildPhase = ''
+              # Yarn writes cache directories etc to $HOME.
+              export HOME=$PWD/yarn_home
+              yarn build:prod
+            '';
+          };
         };
 
-      };
-
-      defaultPackage.x86_64-linux = self.packages.x86_64-linux.lemmy-ui;
+      defaultPackage = forAllSystems (system: self.packages.${system}.lemmy-ui);
       # Provide some binary packages for selected system types.
       packages = forAllSystems (system:
         {
@@ -60,3 +76,4 @@
         });
     };
 }
+
