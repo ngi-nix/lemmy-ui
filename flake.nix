@@ -5,7 +5,10 @@
   inputs.nixpkgs.url = "nixpkgs/nixpkgs-unstable";
 
   # Upstream source tree(s).
-  inputs.lemmy-ui-src = { url = "github:LemmyNet/lemmy-ui/6994a3a6913ff3eabe98f5f182343d58ffb6a3a0"; flake = false; };
+  inputs.lemmy-ui-src = {
+    url = "github:LemmyNet/lemmy-ui/6994a3a6913ff3eabe98f5f182343d58ffb6a3a0";
+    flake = false;
+  };
 
   outputs = { self, nixpkgs, lemmy-ui-src }:
     let
@@ -46,20 +49,21 @@
             yarnNix = ./yarn.nix;
             yarnLock = ./yarn.lock;
             packageJSON = patchedPackageJSON;
-            # yarnPreBuild = ''
-            #   mkdir -p $HOME/.node-gyp/${nodejs.version}
-            #   echo 9 > $HOME/.node-gyp/${nodejs.version}/installVersion
-            #   ln -sfv ${nodejs}/include $HOME/.node-gyp/${nodejs.version}
-            # '';
-            # pkgConfig = {
-            #   node-sass = {
-            #     buildInputs = with final;[ python libsass pkgconfig ];
-            #     postInstall = ''
-            #       LIBSASS_EXT=auto yarn --offline run build
-            #       rm build/config.gypi
-            #     '';
-            #   };
-            # };
+            yarnPreBuild = ''
+              mkdir -p $HOME/.node-gyp/${nodejs.version}
+              echo 9 > $HOME/.node-gyp/${nodejs.version}/installVersion
+              ln -sfv ${nodejs}/include $HOME/.node-gyp/${nodejs.version}
+              export npm_config_nodedir=${nodejs}
+            '';
+            pkgConfig = {
+              node-sass = {
+                buildInputs = with final;[ python libsass pkgconfig ];
+                postInstall = ''
+                  LIBSASS_EXT=auto yarn --offline run build
+                  rm build/config.gypi
+                '';
+              };
+            };
             buildPhase = ''
               # Yarn writes cache directories etc to $HOME.
               export HOME=$PWD/yarn_home
