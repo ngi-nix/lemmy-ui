@@ -57,7 +57,7 @@
             '';
             pkgConfig = {
               node-sass = {
-                buildInputs = with final;[ python libsass pkgconfig ];
+                buildInputs = with final;[ python libsass pkg-config ];
                 postInstall = ''
                   LIBSASS_EXT=auto yarn --offline run build
                   rm build/config.gypi
@@ -67,8 +67,12 @@
             buildPhase = ''
               # Yarn writes cache directories etc to $HOME.
               export HOME=$PWD/yarn_home
-              yarn build:prod
+              
+              ln -sf $PWD/node_modules $PWD/deps/lemmy-ui/
+              
+              yarn --offline build:prod
             '';
+            distPhase = "true";
           };
         };
 
@@ -80,4 +84,3 @@
         });
     };
 }
-
