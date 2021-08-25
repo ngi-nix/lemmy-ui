@@ -55,15 +55,6 @@
               ln -sfv ${nodejs}/include $HOME/.node-gyp/${nodejs.version}
               export npm_config_nodedir=${nodejs}
             '';
-            pkgConfig = {
-              node-sass = {
-                buildInputs = with final;[ python libsass pkg-config ];
-                postInstall = ''
-                  LIBSASS_EXT=auto yarn --offline run build
-                  rm build/config.gypi
-                '';
-              };
-            };
             buildPhase = ''
               # Yarn writes cache directories etc to $HOME.
               export HOME=$PWD/yarn_home
@@ -73,6 +64,15 @@
               yarn --offline build:prod
             '';
             distPhase = "true";
+            pkgConfig = {
+              node-sass = {
+                buildInputs = with final;[ python libsass pkg-config ];
+                postInstall = ''
+                  LIBSASS_EXT=auto yarn --offline run build
+                  rm build/config.gypi
+                '';
+              };
+            };
           };
         };
 
