@@ -16,7 +16,7 @@
       userFriendlyVersion = src: builtins.substring 0 8 lemmy-ui-src.lastModifiedDate;
 
       # System types to support.
-      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+      supportedSystems = [ "x86_64-linux" ];
 
       # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
