@@ -1,8 +1,8 @@
 {
-  description = "(insert short project description here)";
+  description = "Flake for lemmy-ui";
 
   # Nixpkgs / NixOS version to use.
-  inputs.nixpkgs.url = "nixpkgs/nixpkgs-unstable";
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 
   # Upstream source tree(s).
   inputs.lemmy-ui-src = {
