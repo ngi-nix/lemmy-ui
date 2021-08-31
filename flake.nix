@@ -34,7 +34,7 @@
       # Provide some binary packages for selected system types.
       packages = forAllSystems (system:
         {
-          inherit (nixpkgsFor.${system}) lemmy-ui;
+          inherit (nixpkgsFor.${system}) lemmy-ui lemmy-ui-docker;
         });
     };
 }
