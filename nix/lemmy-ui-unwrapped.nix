@@ -8,7 +8,7 @@
 , _rev ? self.rev or "dirty"
 }:
 
-let 
+let
   pkgConfig = {
     node-sass = {
       nativeBuildInputs = [ ];
@@ -19,7 +19,8 @@ let
       '';
     };
   };
-in mkYarnPackage rec {
+in
+mkYarnPackage rec {
   pname = "lemmy-ui";
   version = _rev;
 
@@ -29,12 +30,13 @@ in mkYarnPackage rec {
 
   yarnNix = ./yarn.nix;
   yarnLock = ../yarn.lock;
-
   packageJSON = ../package.json;
+
   yarnPreBuild = ''
     mkdir -p $HOME/.node-gyp/${nodejs.version}
     echo 9 > $HOME/.node-gyp/${nodejs.version}/installVersion
     ln -sfv ${nodejs}/include $HOME/.node-gyp/${nodejs.version}
+
     export npm_config_nodedir=${nodejs}
   '';
 
