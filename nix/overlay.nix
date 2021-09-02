@@ -1,7 +1,7 @@
 final: prev: {
-  lemmy-ui-unwrapped = prev.callPackage ./lemmy-ui-unwrapped.nix { };
+  lemmy-ui = prev.callPackage ./lemmy-ui.nix { };
 
-  lemmy-ui = final.callPackage ./lemmy-ui-wrapped.nix { };
+  lemmy-ui-docker = final.callPackage ./lemmy-ui-docker.nix { };
 
   src_with_submodules = builtins.fetchGit {
     url = "https://github.com/LemmyNet/lemmy-ui";
