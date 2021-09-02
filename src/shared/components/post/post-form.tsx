@@ -28,7 +28,7 @@ import {
   communityToChoice,
   debounce,
   fetchCommunities,
-  getPageTitle,
+  getSiteMetadata,
   isBrowser,
   isImage,
   pictrsDeleteToast,
@@ -194,7 +194,7 @@ export class PostForm extends Component<PostFormProps, PostFormState> {
                 <label
                   htmlFor="file-upload"
                   className={`${
-                    UserService.Instance.localUserView && "pointer"
+                    UserService.Instance.myUserInfo && "pointer"
                   } d-inline-block float-right text-muted font-weight-bold`}
                   data-tippy-content={i18n.t("upload_image")}
                 >
@@ -206,7 +206,7 @@ export class PostForm extends Component<PostFormProps, PostFormState> {
                   accept="image/*,video/*"
                   name="file"
                   class="d-none"
-                  disabled={!UserService.Instance.localUserView}
+                  disabled={!UserService.Instance.myUserInfo}
                   onChange={linkEvent(this, this.handleImageUpload)}
                 />
               </form>
@@ -414,8 +414,8 @@ export class PostForm extends Component<PostFormProps, PostFormState> {
       WebSocketService.Instance.send(wsClient.search(form));
 
       // Fetch the page title
-      getPageTitle(this.state.postForm.url).then(d => {
-        this.state.suggestedTitle = d;
+      getSiteMetadata(this.state.postForm.url).then(d => {
+        this.state.suggestedTitle = d.metadata.title;
         this.setState(this.state);
       });
     } else {
@@ -601,7 +601,7 @@ export class PostForm extends Component<PostFormProps, PostFormState> {
       let data = wsJsonToRes<PostResponse>(msg).data;
       if (
         data.post_view.creator.id ==
-        UserService.Instance.localUserView.person.id
+        UserService.Instance.myUserInfo.local_user_view.person.id
       ) {
         this.state.loading = false;
         this.props.onCreate(data.post_view);
@@ -610,7 +610,7 @@ export class PostForm extends Component<PostFormProps, PostFormState> {
       let data = wsJsonToRes<PostResponse>(msg).data;
       if (
         data.post_view.creator.id ==
-        UserService.Instance.localUserView.person.id
+        UserService.Instance.myUserInfo.local_user_view.person.id
       ) {
         this.state.loading = false;
         this.props.onEdit(data.post_view);

@@ -15,6 +15,7 @@ import {
   ModRemoveCommunityView,
   ModRemovePostView,
   ModStickyPostView,
+  ModTransferCommunityView,
   SiteView,
   UserOperation,
 } from "lemmy-js-client";
@@ -48,6 +49,7 @@ enum ModlogEnum {
   ModRemoveCommunity,
   ModBanFromCommunity,
   ModAddCommunity,
+  ModTransferCommunity,
   ModAdd,
   ModBan,
 }
@@ -64,6 +66,7 @@ type ModlogType = {
     | ModBanFromCommunityView
     | ModBanView
     | ModAddCommunityView
+    | ModTransferCommunityView
     | ModAddView;
   when_: string;
 };
@@ -91,6 +94,7 @@ export class Modlog extends Component<any, ModlogState> {
       banned_from_community: [],
       banned: [],
       added_to_community: [],
+      transferred_to_community: [],
       added: [],
     },
     page: 1,
@@ -184,6 +188,14 @@ export class Modlog extends Component<any, ModlogState> {
       when_: r.mod_add_community.when_,
     }));
 
+    let transferred_to_community: ModlogType[] =
+      res.transferred_to_community.map(r => ({
+        id: r.mod_transfer_community.id,
+        type_: ModlogEnum.ModTransferCommunity,
+        view: r,
+        when_: r.mod_transfer_community.when_,
+      }));
+
     let added: ModlogType[] = res.added.map(r => ({
       id: r.mod_add.id,
       type_: ModlogEnum.ModAdd,
@@ -207,6 +219,7 @@ export class Modlog extends Component<any, ModlogState> {
     combined.push(...removed_communities);
     combined.push(...banned_from_community);
     combined.push(...added_to_community);
+    combined.push(...transferred_to_community);
     combined.push(...added);
     combined.push(...banned);
 
@@ -326,6 +339,21 @@ export class Modlog extends Component<any, ModlogState> {
           </span>,
         ];
       }
+      case ModlogEnum.ModTransferCommunity: {
+        let mtc = i.view as ModTransferCommunityView;
+        return [
+          <span>
+            {mtc.mod_transfer_community.removed ? "Removed " : "Transferred "}{" "}
+          </span>,
+          <span>
+            <CommunityLink community={mtc.community} />
+          </span>,
+          <span> to </span>,
+          <span>
+            <PersonListing person={mtc.modded_person} />
+          </span>,
+        ];
+      }
       case ModlogEnum.ModBan: {
         let mb = i.view as ModBanView;
         return [
@@ -381,16 +409,16 @@ export class Modlog extends Component<any, ModlogState> {
 
   get isAdminOrMod(): boolean {
     let isAdmin =
-      UserService.Instance.localUserView &&
+      UserService.Instance.myUserInfo &&
       this.isoData.site_res.admins
         .map(a => a.person.id)
-        .includes(UserService.Instance.localUserView.person.id);
+        .includes(UserService.Instance.myUserInfo.local_user_view.person.id);
     let isMod =
-      UserService.Instance.localUserView &&
+      UserService.Instance.myUserInfo &&
       this.state.communityMods &&
       this.state.communityMods
         .map(m => m.moderator.id)
-        .includes(UserService.Instance.localUserView.person.id);
+        .includes(UserService.Instance.myUserInfo.local_user_view.person.id);
     return isAdmin || isMod;
   }
 
