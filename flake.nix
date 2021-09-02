@@ -23,7 +23,7 @@
 
       # A Nixpkgs overlay.
       overlay = final: prev: {
-          inherit self lemmy-ui-src;
+        inherit self lemmy-ui-src;
       };
 
       # Nixpkgs instantiated for supported system types.
