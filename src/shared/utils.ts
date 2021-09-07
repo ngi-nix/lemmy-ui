@@ -145,6 +145,8 @@ export const languages = [
   { code: "mnc" },
   { code: "sk" },
   { code: "vi" },
+  { code: "pt" },
+  { code: "ar" },
 ];
 
 export const themes = [
@@ -446,7 +448,7 @@ export function getMomentLanguage(): string {
     lang = "fa";
   } else if (lang.startsWith("pl")) {
     lang = "pl";
-  } else if (lang.startsWith("pt")) {
+  } else if (lang.startsWith("pt_BR")) {
     lang = "pt-br";
   } else if (lang.startsWith("ja")) {
     lang = "ja";
@@ -496,6 +498,10 @@ export function getMomentLanguage(): string {
     lang = "sk";
   } else if (lang.startsWith("vi")) {
     lang = "vi";
+  } else if (lang.startsWith("pt")) {
+    lang = "pt";
+  } else if (lang.startsWith("ar")) {
+    lang = "ar";
   } else {
     lang = "en";
   }
@@ -683,18 +689,21 @@ export function notifyPrivateMessage(pmv: PrivateMessageView, router: any) {
 function notify(info: NotifyInfo, router: any) {
   messageToastify(info, router);
 
-  if (Notification.permission !== "granted") Notification.requestPermission();
-  else {
-    var notification = new Notification(info.name, {
-      icon: info.icon,
-      body: info.body,
-    });
+  // TODO absolute nightmare bug, but notifs are currently broken.
+  // Notification.new will try to do a browser fetch ???
 
-    notification.onclick = (ev: Event): any => {
-      ev.preventDefault();
-      router.history.push(info.link);
-    };
-  }
+  // if (Notification.permission !== "granted") Notification.requestPermission();
+  // else {
+  //   var notification = new Notification(info.name, {
+  //     icon: info.icon,
+  //     body: info.body,
+  //   });
+
+  //   notification.onclick = (ev: Event): any => {
+  //     ev.preventDefault();
+  //     router.history.push(info.link);
+  //   };
+  // }
 }
 
 export function setupTribute() {
