@@ -53,8 +53,9 @@ let
 
     inherit pkgConfig;
   };
-in (writeShellScriptBin "lemmy-ui" ''
-   ${nodejs}/bin/node ${unwrapped}/libexec/lemmy-ui/node_modules/lemmy-ui/dist/js/server.js
+in
+(writeShellScriptBin "lemmy-ui" ''
+  ${nodejs}/bin/node ${unwrapped}/libexec/lemmy-ui/node_modules/lemmy-ui/dist/js/server.js
 '').overrideAttrs (oldAttrs: {
   passthru = { inherit unwrapped; };
 })

@@ -10,5 +10,3 @@ dockerTools.buildImage {
     lemmy-ui
   ];
 }
-
-
